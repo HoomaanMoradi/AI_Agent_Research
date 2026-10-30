@@ -1,0 +1,125 @@
+# Application settings. Edit this file; .env and RESEARCH_* variables are not read.
+# Keep the actual API key in ~/.bashrc, never in this file.
+# Relative paths resolve from the directory containing this YAML file.
+
+# Change topic alone when query is null: the arXiv query is derived automatically.
+topic: small language models
+query: null  # Or an explicit arXiv expression, e.g. 'ti:"small language model"'
+data: data  # Use a separate directory when changing to an unrelated topic.
+paper_limit: 5
+
+model: nvidia/nemotron-3.5-super-vl:free
+vision_model: nvidia/nemotron-3.5-super-vl:free
+max_turns: 10
+max_tools: 16
+max_tokens: 60000
+output_tokens: 1800
+seconds: 180
+max_question_chars: 8000
+min_request_tokens: 128
+history_item_reserve_tokens: 512
+local_only: false  # Restricts paper discovery; the model still uses the live API.
+metadata_only: false
+force_reindex: false
+answer_output: data/runs/answer.json
+input_price: 0  # Optional USD / million tokens; 0 means no cost estimate.
+output_price: 0
+
+api:
+  base_url: https://openrouter.ai/api/v1
+  max_retries: 0
+  timeout_seconds: 60
+  vision_timeout_seconds: 40
+  vision_output_tokens: 1000
+  vision_input_reserve_tokens: 6000
+  max_vision_question_chars: 1000
+
+credentials:
+  env_var: OPENROUTER_API_KEY  # Variable name only, NOT the key value.
+  bashrc: ~/.bashrc
+  bash_executable: bash
+  timeout_seconds: 5
+  prefer_bashrc: true
+
+discovery:
+  request_interval_seconds: 3.1  # arXiv requires at least 3 seconds.
+  timeout_seconds: 40
+  attempts: 4
+  retry_backoff_base: 2
+  max_retry_after_seconds: 60
+  cache_ttl_seconds: 86400
+  page_size: 10
+  scan_multiplier: 3  # Extra result pages allowed to replace duplicates.
+  max_metadata_bytes: 5000000
+  max_pdf_bytes: 50000000
+  tool_limit: 5
+  max_tool_limit: 20
+  sort_by: relevance
+  sort_order: descending
+  user_agent: arxiv-research-agent/0.1 (personal research)
+
+retrieval:
+  limit: 5
+  max_tool_limit: 10
+  max_query_chars: 500
+  max_query_terms: 40
+  chunk_chars: 2000
+  paragraph_chars: 1800  # Leave at least 2 characters for paragraph separators.
+
+processing:
+  max_pages: 300
+  low_text_chars: 40
+  extract_tables: true
+  extract_images: true
+  max_images_per_page: 30
+  min_image_dimension: 32
+  max_image_dimension: 6000
+  max_image_bytes: 5000000
+  render_scale: 1.4
+  render_max_dimension: 1600
+  table_text_chars: 16000
+
+calculator:
+  timeout_seconds: 3
+  cpu_seconds: 2
+  memory_mb: 256
+  open_files: 16
+  max_expression_chars: 2000
+  max_input_bytes: 100000
+  max_ast_nodes: 200
+  max_list_items: 1000
+  max_abs_number: 1.0e+100
+
+evaluation:
+  cases: evaluation/questions.jsonl
+  output: data/runs/evaluation.json
+  retrieval_k: 5
+  local_only: true
+  live: false
+  manifest_output: data/runs/corpus.json
+  examples_output: data/runs/examples.json
+
+diagnostics:
+  output: data/runs/api-check.json
+  query: null  # null uses the current research topic for the tool-call check.
+  output_tokens: 1000
+  timeout_seconds: 60
+
+logging:
+  level: INFO
+  http_level: WARNING
+
+# Optional reproducible local tool calls for scripts/capture_examples.py.
+# Keep these examples aligned with your topic/corpus. No model is used here.
+examples:
+  - question: Find local evidence about small language models
+    tool: paper_retrieval
+    arguments:
+      query: small language models
+      limit: 3
+  - question: Demonstrate a calculation on supplied numbers (not a paper finding)
+    tool: python_analysis
+    arguments:
+      expression: mean(scores)
+      data:
+        scores: [2, 4, 6]
