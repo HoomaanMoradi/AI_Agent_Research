@@ -109,8 +109,8 @@ logging:
   level: INFO
   http_level: WARNING
 
-# Optional reproducible local tool calls for scripts/capture_examples.py.
-# Keep these examples aligned with your topic/corpus. No model is used here.
+# Optional tool-call examples for custom integrations (no bundled runner).
+# Keep these examples aligned with your topic/corpus.
 examples:
   - question: Find local evidence about small language models
     tool: paper_retrieval
